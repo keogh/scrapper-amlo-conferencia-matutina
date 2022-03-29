@@ -2,19 +2,32 @@ const axios = require('axios').default
 const cheerio = require('cheerio')
 const fs = require('fs').promises
 
-const URL = 'https://presidente.gob.mx/secciones/version-estenografica/'
+const BASE_URL = 'https://presidente.gob.mx/secciones/version-estenografica/'
 
 async function getLinks() {
-  try {
-    const response = await axios.get(URL)
+  // TODO: Find a better way to find the last page
+  // TODO: Access denied is thrown when try to scrape all pages, I need to find a better way to handle this
+  const lastPage = 95
+  const startPage = 1
+  let allLinks = []
 
-    const $ = cheerio.load(response.data)
-    return $('#main article .entry-title a')
-      .map((_, elem) => $(elem).attr('href'))
-      .toArray()
-  } catch (error) {
-    console.log('Error: ', error)
+  for (let currentPage = startPage; currentPage <= lastPage; currentPage++) {
+    const url = currentPage > 1 ? `${BASE_URL}page/${currentPage}/` : BASE_URL
+    console.log('Geting links in page: ', currentPage)
+    try {
+      const response = await axios.get(url)
+      const $ = cheerio.load(response.data)
+      const links = $('#main article .entry-title a')
+        .map((_, elem) => $(elem).attr('href'))
+        .toArray()
+
+      allLinks = [...allLinks, ...links]
+    } catch (error) {
+      console.log('Error: ', error)
+    }
   }
+
+  return allLinks;
 }
 
 async function createFile(link, header, content) {
@@ -23,6 +36,7 @@ async function createFile(link, header, content) {
   const extension = 'txt'
   const basePath = './data'
 
+  // TODO: Check the header for the date instead of the url
   const match = filename.match(/^\d{2}-\d{2}-\d{2}/)
   if (match === null) {
     console.log(`cannot find date in filename: ${filename}`)
@@ -43,6 +57,7 @@ async function createFile(link, header, content) {
 }
 
 async function processLink(link = '') {
+  console.log('Processing link: ', link)
   try {
     const response = await axios.get(link)
 
@@ -67,10 +82,10 @@ function processLinks(links = []) {
 async function init() {
   const links = await getLinks()
 
-  // console.log(links)
+  console.log(links)
+  console.log('Links length: ', links.length)
 
-  processLink(links[0])
-  // processLinks(links)
+  processLinks(links)
 }
 
 init()
