@@ -16,11 +16,43 @@ async function getLinks() {
   }
 }
 
+async function createFile(link, header, content) {
+  try {
+
+  } catch (error) {
+
+  }
+}
+
+async function processLink(link = '') {
+  try {
+    const response = await axios.get(link)
+
+    const $ = cheerio.load(response.data)
+    
+    const entryHeader = $('#main .post .entry-header .entry-title').text()
+
+    const $content = $('#main .post .entry-content')
+    $content.find('[style="text-align: right;"]').remove()
+    const entryContent = $content.text()
+
+    await createFile(link, entryHeader, entryContent)
+  } catch (error) {
+    console.log(`Error with link ${link}: `, error)
+  }
+}
+
+function processLinks(links = []) {
+  links.map(processLink)
+}
 
 async function init() {
   const links = await getLinks()
 
+  // console.log(links)
 
+  // processLink(links[0])
+  processLinks(links)
 }
 
 init()
