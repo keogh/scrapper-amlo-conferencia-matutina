@@ -1,0 +1,12 @@
+{
+  "name": "scrapper-mananera-amlo",
+  "version": "1.0.0",
+  "description": "Scrapper para obtener la version estenográfica de la mañanera de AMLO (Presidente de Mexico 2018 - 2024)",
+  "main": "index.js",
+  "author": "Isaac Zepeda",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cheerio": "^1.0.0-rc.10"
+  }
+}
